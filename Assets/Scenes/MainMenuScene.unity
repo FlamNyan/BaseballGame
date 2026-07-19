@@ -697,9 +697,6 @@ MonoBehaviour:
   sfxSource: {fileID: 795778478}
   menuMusic: {fileID: 8300000, guid: 77de6d60383864593be67ebd4340926f, type: 3}
   crowdCheerStart: {fileID: 8300000, guid: 30336e41850794c2193f3cb0bfb33948, type: 3}
-  goodPerformanceMusic: {fileID: 8300000, guid: 5a80408df17e34a789fb998a278667e7, type: 3}
-  okPerformanceMusic: {fileID: 8300000, guid: 01c8eabe4c769490d8be35831f0d2dfc, type: 3}
-  badPerformanceMusic: {fileID: 8300000, guid: b3ec4c1689edf443d801143e2e4e2757, type: 3}
   batHitSounds:
   - {fileID: 8300000, guid: a9a531ee1845e4c2f8ec1e8b46e373c4, type: 3}
   - {fileID: 8300000, guid: 5f817e7b8fd214403b24f2694e84219d, type: 3}
@@ -1249,7 +1246,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1462798349}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1521537017}
+        m_TargetAssemblyTypeName: SceneController, Assembly-CSharp
+        m_MethodName: QuitGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1462798349
 MonoBehaviour:
   m_ObjectHideFlags: 0

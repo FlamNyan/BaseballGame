@@ -6,10 +6,13 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Jimmy_Workspace.unity
-    guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
     path: Assets/Scenes/MainMenuScene.unity
     guid: cb439f4b486b646448c72a06805f6a73
+  - enabled: 1
+    path: Assets/Scenes/CreditScene.unity
+    guid: 900eae4b5e25a32499e4b020c06bb21d
+  - enabled: 1
+    path: Assets/Scenes/Jimmy_Workspace.unity
+    guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

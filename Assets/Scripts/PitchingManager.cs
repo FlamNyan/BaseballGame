@@ -27,22 +27,6 @@ namespace BaseballGame.Scripts.Managers
         // Conversion constant: 1 MPH = 0.44704 Meters Per Second
         private const float _MphToMps = 0.44704f;
 
-        [Header("MLB Velocity Ranges (MPH)")]
-        [SerializeField] private float lowSpeedMin = 70f;
-        [SerializeField] private float lowSpeedMax = 80f;
-        [SerializeField] private float medSpeedMin = 81f;
-        [SerializeField] private float medSpeedMax = 90f;
-        [SerializeField] private float highSpeedMin = 91f;
-        [SerializeField] private float highSpeedMax = 102f;
-
-        [Header("MLB Spin Rate Ranges (RPM)")]
-        [SerializeField] private float lowSpinMin = 1000f;
-        [SerializeField] private float lowSpinMax = 1800f;
-        [SerializeField] private float medSpinMin = 1801f;
-        [SerializeField] private float medSpinMax = 2400f;
-        [SerializeField] private float highSpinMin = 2401f;
-        [SerializeField] private float highSpinMax = 3000f;
-
         // Singleton pattern to ensure only one instance of PitchingManager exists
         public static PitchingManager Instance
         {
