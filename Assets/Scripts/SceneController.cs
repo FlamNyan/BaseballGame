@@ -9,7 +9,7 @@ public class SceneController : MonoBehaviour
     {
         // LoadSceneMode.Single automatically destroys the previous scene's objects 
         // (except our persistent Managers), so we don't need an unLoadScene method!
-        SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+        SceneManager.LoadScene("Jimmy_Workspace", LoadSceneMode.Single);
         
         // Tell the SoundManager to play the crowd cheer
         if (SoundManager.Instance != null)

@@ -1,4 +1,5 @@
 using UnityEngine;
+using BaseballGame.Scripts.Managers; // Added to easily access the SoundManager
 
 public class BattingScript : MonoBehaviour
 {
@@ -63,6 +64,12 @@ public class BattingScript : MonoBehaviour
             targetRigidbody.AddForce(launchDirection * hitForce, ForceMode.Impulse);
             
             Debug.Log($"Whack! Hit {collision.gameObject.name} with a force of {hitForce} via passthrough!");
+
+            // Play the standard bat crack sound with a safety check
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlayBatHit();
+            }
         }
     }
 }

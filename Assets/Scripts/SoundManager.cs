@@ -37,9 +37,8 @@ namespace BaseballGame.Scripts.Managers
         [Header("Music & Ambience")]
         [SerializeField] private AudioClip menuMusic;
         [SerializeField] private AudioClip crowdCheerStart;
-        [SerializeField] private AudioClip goodPerformanceMusic;
-        [SerializeField] private AudioClip okPerformanceMusic;
-        [SerializeField] private AudioClip badPerformanceMusic;
+        
+        [Header("Sound Effects")]
         [Tooltip("Add multiple hit sounds here to randomize the bat crack.")]
         [SerializeField] private AudioClip[] batHitSounds;
 
@@ -54,29 +53,24 @@ namespace BaseballGame.Scripts.Managers
             _instance = this;
             DontDestroyOnLoad(gameObject);
 
-            // Safety check: Auto-create AudioSources if they weren't assigned in the Inspector
             if (musicSource == null) musicSource = gameObject.AddComponent<AudioSource>();
             if (sfxSource == null) sfxSource = gameObject.AddComponent<AudioSource>();
 
-            // Ensure the music channel loops continuously
             musicSource.loop = true; 
         }
 
         private void Start()
         {
-            // Start playing the menu music as soon as the manager initializes
             PlayMenuMusic();
         }
 
         private void OnApplicationQuit() => _isQuitting = true;
 
-        // ==========================================
-        // --- BACKGROUND MUSIC (BGM) METHODS ---
-        // ==========================================
-
         public void PlayMenuMusic()
         {
             if (menuMusic == null) return;
+            if (musicSource.clip == menuMusic && musicSource.isPlaying) return;
+            
             musicSource.clip = menuMusic;
             musicSource.Play();
         }
@@ -88,33 +82,10 @@ namespace BaseballGame.Scripts.Managers
             musicSource.Play();
         }
 
-        public void PlayEndGameMusic(PerformanceResult result)
-        {
-            AudioClip clipToPlay = result switch
-            {
-                PerformanceResult.Good => goodPerformanceMusic,
-                PerformanceResult.Ok => okPerformanceMusic,
-                PerformanceResult.Bad => badPerformanceMusic,
-                _ => null
-            };
-
-            if (clipToPlay != null)
-            {
-                musicSource.clip = clipToPlay;
-                musicSource.Play();
-            }
-        }
-
-        // ==========================================
-        // --- SOUND EFFECTS (SFX) METHODS ---
-        // ==========================================
-
-
         public void PlayBatHit()
         {
             if (batHitSounds == null || batHitSounds.Length == 0) return;
 
-            // Pick a random crack sound from the array
             int randomIndex = Random.Range(0, batHitSounds.Length);
             AudioClip hitSound = batHitSounds[randomIndex];
 
