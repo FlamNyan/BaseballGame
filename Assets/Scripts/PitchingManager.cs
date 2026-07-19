@@ -1,19 +1,19 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace BaseballGame.Scripts.Managers
 {
 
     public struct PitchData
     {
-        public float SpeedMPS;      // Meters per second (ready for Unity physics) 
-        public float SpinRateRPM;   // Rotations per minute  
-        public Vector3 SpinAxis;    // The normalized directional axis of the spin
-
+        public PitchType Type;      // Tell the ball what type of pitch it is
+        public float SpeedMPS;      
+        public float SpinRateRPM;     
+        public Vector3 SpinAxis;    
     }
 
-    public enum PitchSpeed { LowVelocity = 0, MediumVelocity = 1, HighVelocity = 2 }
-    public enum SpinType { BackSpin = 0, TopSpin = 1, SideSpin = 2 }
-    public enum SpinRate { LowSpinRate = 0, MediumSpinRate = 1, HighSpinRate = 2 }
+    // The 5 main pitches
+    public enum PitchType { FourSeamFastball, Curveball, Slider, Changeup, Knuckleball }
 
     // Ensures that the PitchingManager is initialized before any other scripts that depend on it
     [DefaultExecutionOrder(-100)] 
@@ -85,21 +85,20 @@ namespace BaseballGame.Scripts.Managers
             DontDestroyOnLoad(gameObject);
         }
 
-        // Temporary add in PitchingManager script to test the system
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            // Make sure a keyboard is connected, then check if space was pressed
+            if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
             {
-                // Find the ball in the scene (ensure your baseball prefab has the tag "Player" or adjust accordingly)
+                // Find the ball in the scene
                 BaseballPhysics ball = FindAnyObjectByType<BaseballPhysics>();
                 
                 if (ball != null)
                 {
-                    // Reset ball position for repeated testing
-                    ball.transform.position = transform.position; 
-                    ball.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+                    // 1. Perfectly scrub and reset the ball
+                    ball.ResetPitch(transform.position); 
 
-                    // Generate the payload and fire
+                    // 2. Generate the payload and fire
                     PitchData newPitch = GenerateRandomPitch();
                     ball.InitializePitch(newPitch);
                     
@@ -117,62 +116,46 @@ namespace BaseballGame.Scripts.Managers
         public PitchData GenerateRandomPitch()
         {
             PitchData pitch = new PitchData();
+            
+            // Randomly select one of the 5 pitch types
+            pitch.Type = (PitchType)Random.Range(0, 5);
 
-            // 1. Calculate Speed in m/s
-            float speedMph = RandomizePitchSpeed();
-            pitch.SpeedMPS = speedMph * _MphToMps;
+            // Assign the physical profile based on the chosen pitch
+            switch (pitch.Type)
+            {
+                case PitchType.FourSeamFastball:
+                    pitch.SpeedMPS = Random.Range(92f, 100f) * _MphToMps;
+                    pitch.SpinRateRPM = Random.Range(2200f, 2500f);
+                    pitch.SpinAxis = Vector3.left; // Pure backspin (fights gravity)
+                    break;
 
-            // 2. Calculate Spin Rate
-            pitch.SpinRateRPM = RandomizeSpinRate();
+                case PitchType.Curveball:
+                    pitch.SpeedMPS = Random.Range(76f, 83f) * _MphToMps;
+                    pitch.SpinRateRPM = Random.Range(2400f, 2900f);
+                    pitch.SpinAxis = Vector3.right; // Pure topspin (snaps downward)
+                    break;
 
-            // 3. Determine Spin Axis for Magnus Cross Product
-            pitch.SpinAxis = GetSpinAxis(RandomizeSpinType());
+                case PitchType.Slider:
+                    pitch.SpeedMPS = Random.Range(82f, 89f) * _MphToMps;
+                    pitch.SpinRateRPM = Random.Range(2300f, 2800f);
+                    pitch.SpinAxis = Vector3.up; // Sidespin (sweeps horizontally)
+                    break;
+
+                case PitchType.Changeup:
+                    // Looks like a fastball (backspin), but thrown much slower to mess with batter timing
+                    pitch.SpeedMPS = Random.Range(80f, 86f) * _MphToMps;
+                    pitch.SpinRateRPM = Random.Range(1500f, 1900f);
+                    pitch.SpinAxis = Vector3.left; 
+                    break;
+
+                case PitchType.Knuckleball:
+                    pitch.SpeedMPS = Random.Range(65f, 75f) * _MphToMps;
+                    pitch.SpinRateRPM = Random.Range(10f, 100f); // Almost no spin
+                    pitch.SpinAxis = Vector3.zero; // Neutral axis
+                    break;
+            }
 
             return pitch;
         }
-
-        private float RandomizePitchSpeed()
-        {
-            PitchSpeed ballVelocity = (PitchSpeed)Random.Range(0, 3);
-            return ballVelocity switch
-            {
-                PitchSpeed.LowVelocity => Random.Range(lowSpeedMin, lowSpeedMax),
-                PitchSpeed.MediumVelocity => Random.Range(medSpeedMin, medSpeedMax),
-                PitchSpeed.HighVelocity => Random.Range(highSpeedMin, highSpeedMax),
-                _ => Random.Range(medSpeedMin, medSpeedMax)
-            };
-        }
-
-        private float RandomizeSpinRate()
-        {
-            SpinRate spinRateTier = (SpinRate)Random.Range(0, 3);
-            return spinRateTier switch
-            {
-                SpinRate.LowSpinRate => Random.Range(lowSpinMin, lowSpinMax),
-                SpinRate.MediumSpinRate => Random.Range(medSpinMin, medSpinMax),
-                SpinRate.HighSpinRate => Random.Range(highSpinMin, highSpinMax),
-                _ => Random.Range(medSpinMin, medSpinMax)
-            };
-        }
-
-        private SpinType RandomizeSpinType()
-        {
-            return (SpinType)Random.Range(0, 3);
-        }
-
-       private Vector3 GetSpinAxis(SpinType spinType)
-        {
-            // Adjusted for Unity's Left-Handed Vector3.Cross() math
-            // If we want the slider to break Left instead of Right, change Vector3.up to Vector3.down).
-            // Assuming the pitcher is throwing down the global Z axis (Vector3.forward):
-            return spinType switch
-            {
-                SpinType.BackSpin => Vector3.left,     // Creates upward lift (Fastball)
-                SpinType.TopSpin => Vector3.right,     // Creates downward dive (Curveball)
-                SpinType.SideSpin => Vector3.up,       // Creates horizontal sweep (Slider breaking Right)
-                _ => Vector3.left
-            };
-        }
-
     }
 }

@@ -5,41 +5,56 @@ using BaseballGame.Scripts.Managers;
 public class BaseballPhysics : MonoBehaviour
 {
     [Header("Flight Data (Provided by Manager)")]
+    private PitchType currentPitchType;
     private float currentSpeedMPS;
     private float currentSpinRateRPM;
     private Vector3 currentSpinAxis;
 
-    [Header("Aerodynamic Constants (Real-World Values)")]
-    [Tooltip("Air density at sea level in kg/m^3")]
+    [Header("Aerodynamic Constants")]
     [SerializeField] private float airDensity = 1.225f; 
-    
-    [Tooltip("Cross-sectional area of a standard baseball in m^2")]
     [SerializeField] private float ballArea = 0.0042f;  
-    
-    [Tooltip("Drag coefficient of a standard baseball")]
     [SerializeField] private float dragCoefficient = 0.35f; 
 
     [Header("Gameplay Tuning")]
-    [Tooltip("Adjust this to exaggerate or reduce the physical break of the pitch.")]
     [SerializeField] private float magnusScale = 0.005f; 
+    
+    [Tooltip("How fast the knuckleball darts around")]
+    [SerializeField] private float flutterFrequency = 15f; 
+    [Tooltip("How hard the knuckleball gets pushed sideways/up/down")]
+    [SerializeField] private float flutterStrength = 1.5f;
 
-    // Components
     private Rigidbody rb;
+    private TrailRenderer trailRenderer; 
     private bool isInFlight = false;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        trailRenderer = GetComponent<TrailRenderer>(); 
         rb.linearDamping = 0f; 
         rb.angularDamping = 0.05f;
     }
 
+    public void ResetPitch(Vector3 startPosition)
+    {
+        isInFlight = false;
+        rb.useGravity = false; 
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        transform.position = startPosition;
+        transform.rotation = Quaternion.identity;
+
+        if (trailRenderer != null) trailRenderer.Clear();
+    }
+
     public void InitializePitch(PitchData data)
     {
+        currentPitchType = data.Type;
         currentSpeedMPS = data.SpeedMPS;
         currentSpinRateRPM = data.SpinRateRPM;
         currentSpinAxis = data.SpinAxis;
 
+        rb.useGravity = true; 
         rb.linearVelocity = transform.forward * currentSpeedMPS;
         isInFlight = true;
     }
@@ -51,35 +66,48 @@ public class BaseballPhysics : MonoBehaviour
         Vector3 velocity = rb.linearVelocity;
         float speed = velocity.magnitude;
 
-        // Scenario Account: Stop calculating if the ball hits the catcher's mitt or ground
         if (speed < 0.1f) 
         {
             isInFlight = false;
             return; 
         }
 
-        // --- 1. DRAG FORCE ---
-        // Formula: F_d = 0.5 * rho * v^2 * C_d * A
+        // --- 1. COMMON DRAG FORCE (Applies to all pitches) ---
         float dragMagnitude = 0.5f * airDensity * (speed * speed) * dragCoefficient * ballArea;
-        Vector3 dragDirection = -velocity.normalized;
-        Vector3 dragForce = dragDirection * dragMagnitude;
+        Vector3 dragForce = -velocity.normalized * dragMagnitude;
+        rb.AddForce(dragForce, ForceMode.Force);
 
-        // --- 2. MAGNUS FORCE (SPIN BREAK) ---
-        // Convert RPM to Radians per Second for mathematical accuracy
-        float spinRadSec = currentSpinRateRPM * (Mathf.PI / 30f); 
-        Vector3 spinVector = currentSpinAxis * spinRadSec;
+        // --- 2. PITCH-SPECIFIC BREAKING FORCES ---
+        if (currentPitchType == PitchType.Knuckleball)
+        {
+            // KNUCKLEBALL LOGIC (Erratic Perlin Noise Flutter)
+            // Generates a smooth but random number between -0.5 and 0.5
+            float noiseX = Mathf.PerlinNoise(Time.time * flutterFrequency, 0f) - 0.5f;
+            float noiseY = Mathf.PerlinNoise(0f, Time.time * flutterFrequency) - 0.5f;
 
-        // The cross product finds the exact perpendicular direction the air pushes the ball
-        Vector3 magnusDirection = Vector3.Cross(spinVector, velocity).normalized;
-        
-        // Calculate the magnitude of the break. 
-        // We multiply by our magnusScale so you can balance the game's difficulty.
-        float magnusMagnitude = spinRadSec * speed * airDensity * ballArea * magnusScale;
-        Vector3 magnusForce = magnusDirection * magnusMagnitude;
+            // Apply the chaotic force perpendicular to the ball's forward movement
+            Vector3 flutterDirection = (transform.right * noiseX) + (transform.up * noiseY);
+            Vector3 flutterForce = flutterDirection * flutterStrength;
+            
+            rb.AddForce(flutterForce, ForceMode.Force);
+            
+            // Visual Debugging for Knuckleball (Yellow line)
+            Debug.DrawRay(transform.position, flutterForce.normalized * 2f, Color.yellow);
+        }
+        else
+        {
+            // STANDARD LOGIC (Magnus Spin Break for Fastballs/Breaking/Off-speed)
+            float spinRadSec = currentSpinRateRPM * (Mathf.PI / 30f); 
+            Vector3 spinVector = currentSpinAxis * spinRadSec;
 
-        // --- 3. APPLY FORCES ---
-        rb.AddForce(dragForce + magnusForce, ForceMode.Force);
+            Vector3 magnusDirection = Vector3.Cross(spinVector, velocity).normalized;
+            float magnusMagnitude = spinRadSec * speed * airDensity * ballArea * magnusScale;
+            Vector3 magnusForce = magnusDirection * magnusMagnitude;
+
+            rb.AddForce(magnusForce, ForceMode.Force);
+            
+            // Visual Debugging for Standard Pitches (Green line)
+            Debug.DrawRay(transform.position, magnusForce.normalized * 2f, Color.green);
+        }
     }
-
-    
 }
