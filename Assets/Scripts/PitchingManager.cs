@@ -85,6 +85,29 @@ namespace BaseballGame.Scripts.Managers
             DontDestroyOnLoad(gameObject);
         }
 
+        // Temporary add in PitchingManager script to test the system
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                // Find the ball in the scene (ensure your baseball prefab has the tag "Player" or adjust accordingly)
+                BaseballPhysics ball = FindAnyObjectByType<BaseballPhysics>();
+                
+                if (ball != null)
+                {
+                    // Reset ball position for repeated testing
+                    ball.transform.position = transform.position; 
+                    ball.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+
+                    // Generate the payload and fire
+                    PitchData newPitch = GenerateRandomPitch();
+                    ball.InitializePitch(newPitch);
+                    
+                    Debug.Log($"Pitch Thrown! Speed: {newPitch.SpeedMPS} m/s | Spin: {newPitch.SpinRateRPM} RPM | Axis: {newPitch.SpinAxis}");
+                }
+            }
+        }
+
         // OnApplicationQuit is called when the application is about to quit
         private void OnApplicationQuit()
         {
