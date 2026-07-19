@@ -80,20 +80,26 @@ namespace BaseballGame.Scripts.Managers
             _isQuitting = true;
         }
 
-        private void RandomizePitchSpeed()
+        private float RandomizePitchSpeed()
         {
             PitchSpeed ballVelocity = (PitchSpeed)UnityEngine.Random.Range(0, 3);
+
+            float lowerBound = 0.0f;
+            float upperBound = 0.0f;
 
             switch (ballVelocity)
             {
                 case PitchSpeed.LowVelocity:
+                    return Random.Range(2.0f, 5.9f);
 
                 case PitchSpeed.MediumVelocity:
+                    return Random.Range(6.0f, 9.9f);
 
                 case PitchSpeed.HighVelocity:
+                    return Random.Range(10.0f, 13.9f);
 
                 default:
-                    break;
+                    return 0.0f;
             }     
         }
 
