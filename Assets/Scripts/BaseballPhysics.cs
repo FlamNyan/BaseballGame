@@ -25,7 +25,7 @@ public class BaseballPhysics : MonoBehaviour
 
     private Rigidbody rb;
     private TrailRenderer trailRenderer; 
-    private bool isInFlight = false;
+    private bool isInFlight = true;
 
     private void Awake()
     {
