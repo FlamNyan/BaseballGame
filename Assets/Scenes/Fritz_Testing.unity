@@ -230,6 +230,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BallMovement
   initialVelocity: 0
   spinRate: 0
+--- !u!114 &1028491852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028491846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a384fee288a214f76a126e45ccf7e4bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BaseballPhysics
 --- !u!1 &1289807025
 GameObject:
   m_ObjectHideFlags: 0
@@ -462,6 +474,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2466020862995298275, guid: 84d1c7319742446f68ed632f9e5c3a6a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1028491851}
+    - targetCorrespondingSourceObject: {fileID: 2466020862995298275, guid: 84d1c7319742446f68ed632f9e5c3a6a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1028491852}
   m_SourcePrefab: {fileID: 100100000, guid: 84d1c7319742446f68ed632f9e5c3a6a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

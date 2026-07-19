@@ -3,26 +3,17 @@ using UnityEngine;
 namespace BaseballGame.Scripts.Managers
 {
 
-    public enum PitchSpeed
+    public struct PitchData
     {
-        LowVelocity = 0,
-        MediumVelocity = 1,
-        HighVelocity = 2
+        public float SpeedMPS;      // Meters per second (ready for Unity physics) 
+        public float SpinRateRPM;   // Rotations per minute  
+        public Vector3 SpinAxis;    // The normalized directional axis of the spin
+
     }
 
-    public enum SpinType
-    {
-        BackSpin = 0,
-        TopSpin = 1,
-        SideSpin = 2
-    }
-
-    public enum SpinRate
-    {
-        LowSpinRate = 0,
-        MediumSpinRate = 1,
-        HighSpinRate = 2
-    }
+    public enum PitchSpeed { LowVelocity = 0, MediumVelocity = 1, HighVelocity = 2 }
+    public enum SpinType { BackSpin = 0, TopSpin = 1, SideSpin = 2 }
+    public enum SpinRate { LowSpinRate = 0, MediumSpinRate = 1, HighSpinRate = 2 }
 
     // Ensures that the PitchingManager is initialized before any other scripts that depend on it
     [DefaultExecutionOrder(-100)] 
@@ -33,8 +24,24 @@ namespace BaseballGame.Scripts.Managers
         // Flag to indicate if the application is quitting, to prevent creating a new instance during shutdown
         private static bool _isQuitting;
 
-        [SerializeField] private float pitchSpeedMinRange = 2.0f;
-        [SerializeField] private float speedRange = 3.9f;
+        // Conversion constant: 1 MPH = 0.44704 Meters Per Second
+        private const float _MphToMps = 0.44704f;
+
+        [Header("MLB Velocity Ranges (MPH)")]
+        [SerializeField] private float lowSpeedMin = 70f;
+        [SerializeField] private float lowSpeedMax = 80f;
+        [SerializeField] private float medSpeedMin = 81f;
+        [SerializeField] private float medSpeedMax = 90f;
+        [SerializeField] private float highSpeedMin = 91f;
+        [SerializeField] private float highSpeedMax = 102f;
+
+        [Header("MLB Spin Rate Ranges (RPM)")]
+        [SerializeField] private float lowSpinMin = 1000f;
+        [SerializeField] private float lowSpinMax = 1800f;
+        [SerializeField] private float medSpinMin = 1801f;
+        [SerializeField] private float medSpinMax = 2400f;
+        [SerializeField] private float highSpinMin = 2401f;
+        [SerializeField] private float highSpinMax = 3000f;
 
         // Singleton pattern to ensure only one instance of PitchingManager exists
         public static PitchingManager Instance
@@ -84,64 +91,63 @@ namespace BaseballGame.Scripts.Managers
             _isQuitting = true;
         }
 
-        private float RandomizePitchSpeed()
+        public PitchData GenerateRandomPitch()
         {
-            PitchSpeed ballVelocity = (PitchSpeed)UnityEngine.Random.Range(0, 3);
+            PitchData pitch = new PitchData();
 
-            float lowerBound = pitchSpeedMinRange;
-            float upperBound = pitchSpeedMinRange + speedRange;
-            float tierBoost = upperBound + 0.1f;
+            // 1. Calculate Speed in m/s
+            float speedMph = RandomizePitchSpeed();
+            pitch.SpeedMPS = speedMph * _MphToMps;
 
-            switch (ballVelocity)
-            {
-                case PitchSpeed.LowVelocity:
-                    return Random.Range(lowerBound, upperBound);
+            // 2. Calculate Spin Rate
+            pitch.SpinRateRPM = RandomizeSpinRate();
 
-                case PitchSpeed.MediumVelocity:
-                    lowerBound += tierBoost;
-                    upperBound += tierBoost;
-                    return Random.Range(lowerBound, upperBound);
+            // 3. Determine Spin Axis for Magnus Cross Product
+            pitch.SpinAxis = GetSpinAxis(RandomizeSpinType());
 
-                // In the case High Velocity was randomly chosen
-                default:
-                    lowerBound += (2 * tierBoost);
-                    upperBound += (2 * tierBoost);
-                    return Random.Range(lowerBound, upperBound);
-            }
+            return pitch;
         }
 
-        private SpinType RandomizeSpinType()
+        private float RandomizePitchSpeed()
         {
-            SpinType spinType = (SpinType)UnityEngine.Random.Range(0, 3);
-
-            switch (spinType)
+            PitchSpeed ballVelocity = (PitchSpeed)Random.Range(0, 3);
+            return ballVelocity switch
             {
-                case SpinType.BackSpin:
-                    return SpinType.BackSpin;
-
-                case SpinType.TopSpin:
-                    return SpinType.TopSpin;
-                
-                // In the case Side Spin was randomly chosen
-                default:
-                    return SpinType.SideSpin;
-            }
+                PitchSpeed.LowVelocity => Random.Range(lowSpeedMin, lowSpeedMax),
+                PitchSpeed.MediumVelocity => Random.Range(medSpeedMin, medSpeedMax),
+                PitchSpeed.HighVelocity => Random.Range(highSpeedMin, highSpeedMax),
+                _ => Random.Range(medSpeedMin, medSpeedMax)
+            };
         }
 
         private float RandomizeSpinRate()
         {
-            SpinRate spinRate = (SpinRate)UnityEngine.Random.Range(0, 3);
-
-            switch (spinRate)
+            SpinRate spinRateTier = (SpinRate)Random.Range(0, 3);
+            return spinRateTier switch
             {
-                case SpinRate.LowSpinRate:
+                SpinRate.LowSpinRate => Random.Range(lowSpinMin, lowSpinMax),
+                SpinRate.MediumSpinRate => Random.Range(medSpinMin, medSpinMax),
+                SpinRate.HighSpinRate => Random.Range(highSpinMin, highSpinMax),
+                _ => Random.Range(medSpinMin, medSpinMax)
+            };
+        }
 
-                case SpinRate.MediumSpinRate:
+        private SpinType RandomizeSpinType()
+        {
+            return (SpinType)Random.Range(0, 3);
+        }
 
-                // In the case High Spin Rate was randomly chosen
-                default:
-                    return 0f;
-            } 
+        // 2. Update this method to actually use the spinType passed into it
+        private Vector3 GetSpinAxis(SpinType spinType)
+        {
+            // Assuming the pitcher is throwing down the global Z axis towards the batter:
+            return spinType switch
+            {
+                SpinType.BackSpin => Vector3.right,    // Creates upward lift (Fastball)
+                SpinType.TopSpin => Vector3.left,      // Creates downward dive (Curveball)
+                SpinType.SideSpin => Vector3.up,       // Creates horizontal sweep (Slider/Sweeper)
+                _ => Vector3.right
+            };
         }
 
     }

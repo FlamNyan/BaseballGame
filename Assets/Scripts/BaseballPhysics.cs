@@ -1,9 +1,7 @@
 using UnityEngine;
 
-public class BallMovement : MonoBehaviour
+public class BaseballPhysics : MonoBehaviour
 {
-    [SerializeField] private float initialVelocity = 0.0f;
-    [SerializeField] private float spinRate = 0.0f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
