@@ -242,6 +242,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a384fee288a214f76a126e45ccf7e4bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseballPhysics
+  airDensity: 1.225
+  ballArea: 0.0042
+  dragCoefficient: 0.35
+--- !u!54 &1028491853
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028491846}
+  serializedVersion: 5
+  m_Mass: 0.145
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 2
 --- !u!1 &1289807025
 GameObject:
   m_ObjectHideFlags: 0
@@ -271,8 +301,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 420d690cd1400499babd001b60dd0e86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseballGame.Scripts.Managers.PitchingManager
-  pitchSpeedMinRange: 2
-  speedRange: 3.9
+  lowSpeedMin: 70
+  lowSpeedMax: 80
+  medSpeedMin: 81
+  medSpeedMax: 90
+  highSpeedMin: 91
+  highSpeedMax: 102
+  lowSpinMin: 1000
+  lowSpinMax: 1800
+  medSpinMin: 1801
+  medSpinMax: 2400
+  highSpinMin: 2401
+  highSpinMax: 3000
 --- !u!4 &1289807027
 Transform:
   m_ObjectHideFlags: 0
@@ -477,6 +517,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2466020862995298275, guid: 84d1c7319742446f68ed632f9e5c3a6a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1028491852}
+    - targetCorrespondingSourceObject: {fileID: 2466020862995298275, guid: 84d1c7319742446f68ed632f9e5c3a6a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1028491853}
   m_SourcePrefab: {fileID: 100100000, guid: 84d1c7319742446f68ed632f9e5c3a6a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

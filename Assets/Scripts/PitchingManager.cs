@@ -137,16 +137,17 @@ namespace BaseballGame.Scripts.Managers
             return (SpinType)Random.Range(0, 3);
         }
 
-        // 2. Update this method to actually use the spinType passed into it
-        private Vector3 GetSpinAxis(SpinType spinType)
+       private Vector3 GetSpinAxis(SpinType spinType)
         {
-            // Assuming the pitcher is throwing down the global Z axis towards the batter:
+            // Adjusted for Unity's Left-Handed Vector3.Cross() math
+            // If we want the slider to break Left instead of Right, change Vector3.up to Vector3.down).
+            // Assuming the pitcher is throwing down the global Z axis (Vector3.forward):
             return spinType switch
             {
-                SpinType.BackSpin => Vector3.right,    // Creates upward lift (Fastball)
-                SpinType.TopSpin => Vector3.left,      // Creates downward dive (Curveball)
-                SpinType.SideSpin => Vector3.up,       // Creates horizontal sweep (Slider/Sweeper)
-                _ => Vector3.right
+                SpinType.BackSpin => Vector3.left,     // Creates upward lift (Fastball)
+                SpinType.TopSpin => Vector3.right,     // Creates downward dive (Curveball)
+                SpinType.SideSpin => Vector3.up,       // Creates horizontal sweep (Slider breaking Right)
+                _ => Vector3.left
             };
         }
 
