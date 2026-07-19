@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace BaseballGame.Scripts.Managers
 {
+
     public enum PitchSpeed
     {
         LowVelocity = 0,
@@ -31,6 +32,9 @@ namespace BaseballGame.Scripts.Managers
         private static PitchingManager _instance;
         // Flag to indicate if the application is quitting, to prevent creating a new instance during shutdown
         private static bool _isQuitting;
+
+        [SerializeField] private float pitchSpeedMinRange = 2.0f;
+        [SerializeField] private float speedRange = 3.9f;
 
         // Singleton pattern to ensure only one instance of PitchingManager exists
         public static PitchingManager Instance
@@ -84,57 +88,61 @@ namespace BaseballGame.Scripts.Managers
         {
             PitchSpeed ballVelocity = (PitchSpeed)UnityEngine.Random.Range(0, 3);
 
-            float lowerBound = 0.0f;
-            float upperBound = 0.0f;
+            float lowerBound = pitchSpeedMinRange;
+            float upperBound = pitchSpeedMinRange + speedRange;
+            float tierBoost = upperBound + 0.1f;
 
             switch (ballVelocity)
             {
                 case PitchSpeed.LowVelocity:
-                    return Random.Range(2.0f, 5.9f);
+                    return Random.Range(lowerBound, upperBound);
 
                 case PitchSpeed.MediumVelocity:
-                    return Random.Range(6.0f, 9.9f);
+                    lowerBound += tierBoost;
+                    upperBound += tierBoost;
+                    return Random.Range(lowerBound, upperBound);
 
-                case PitchSpeed.HighVelocity:
-                    return Random.Range(10.0f, 13.9f);
-
+                // In the case High Velocity was randomly chosen
                 default:
-                    return 0.0f;
-            }     
+                    lowerBound += (2 * tierBoost);
+                    upperBound += (2 * tierBoost);
+                    return Random.Range(lowerBound, upperBound);
+            }
         }
 
-        private void RandomizeSpinType()
+        private SpinType RandomizeSpinType()
         {
             SpinType spinType = (SpinType)UnityEngine.Random.Range(0, 3);
 
             switch (spinType)
             {
                 case SpinType.BackSpin:
+                    return SpinType.BackSpin;
 
                 case SpinType.TopSpin:
-
-                case SpinType.SideSpin:
-
+                    return SpinType.TopSpin;
+                
+                // In the case Side Spin was randomly chosen
                 default:
-                    break;
-            }     
+                    return SpinType.SideSpin;
+            }
         }
 
-        private void RandomizeSpinRate()
+        private float RandomizeSpinRate()
         {
             SpinRate spinRate = (SpinRate)UnityEngine.Random.Range(0, 3);
 
             switch (spinRate)
             {
-                case SpinRate.LowSpinRate :
+                case SpinRate.LowSpinRate:
 
                 case SpinRate.MediumSpinRate:
 
-                case SpinRate.HighSpinRate:
-
+                // In the case High Spin Rate was randomly chosen
                 default:
-                    break;
-            }     
+                    return 0f;
+            } 
         }
+
     }
 }
